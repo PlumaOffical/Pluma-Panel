@@ -22,12 +22,27 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL,
+      is_admin INTEGER NOT NULL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`,
     (err) => {
       if (err) console.error('Failed to create users table:', err);
     }
   );
+});
+
+// Ensure `is_admin` column exists for older databases
+db.serialize(() => {
+  db.all("PRAGMA table_info(users)", (err, rows) => {
+    if (err) return console.error('Failed to read users table info:', err);
+    const hasIsAdmin = rows && rows.some(r => r.name === 'is_admin');
+    if (!hasIsAdmin) {
+      db.run(`ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0`, (alterErr) => {
+        if (alterErr) console.error('Failed to add is_admin column:', alterErr);
+        else console.log('Added is_admin column to users table');
+      });
+    }
+  });
 });
 
 // Promise-based helpers (you can also use callbacks if you prefer)
@@ -47,6 +62,16 @@ function findByUsername(username) {
     db.get(sql, [username], (err, row) => {
       if (err) return reject(err);
       resolve(row || null);
+    });
+  });
+}
+
+function setAdmin(id, isAdmin = 1) {
+  return new Promise((resolve, reject) => {
+    const sql = 'UPDATE users SET is_admin = ? WHERE id = ?';
+    db.run(sql, [isAdmin ? 1 : 0, id], function (err) {
+      if (err) return reject(err);
+      resolve(this.changes);
     });
   });
 }
@@ -75,5 +100,6 @@ module.exports = {
   createUser,
   findByUsername,
   findById,
+  setAdmin,
   close,
 };

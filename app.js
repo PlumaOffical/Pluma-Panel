@@ -6,6 +6,8 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
+const adminRoutes = require('./routes/admin');
+const adminUsersRoutes = require('./routes/adminUsers');
 require('./db/init'); // ensures DB and table exist
 
 const app = express();
@@ -44,11 +46,15 @@ app.set('layout', 'components/layout');
 
 app.use((req, res, next) => {
   res.locals.user = req.session ? req.session.user : null;
+  res.locals.currentPath = req.originalUrl || req.path;
+  res.locals.isAdminRoute = String(res.locals.currentPath).startsWith('/admin');
   next();
 });
 
 app.use('/', dashboardRoutes);
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use('/admin/users', adminUsersRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

@@ -13,8 +13,9 @@ exports.register = async (req, res) => {
     if (existing) return res.render('auth/register', { error: 'User already exists' });
 
     const hash = bcrypt.hashSync(password, 10);
-    const id = await Users.createUser(username, hash);
-    req.session.user = { id, username };
+  const id = await Users.createUser(username, hash);
+  // new users are not admins by default
+  req.session.user = { id, username, is_admin: 0 };
     res.redirect('/');
   } catch (err) {
     console.error('Register error', err);
@@ -33,7 +34,8 @@ exports.login = async (req, res) => {
     const ok = bcrypt.compareSync(password, user.password);
     if (!ok) return res.render('auth/login', { error: 'Invalid credentials' });
 
-    req.session.user = { id: user.id, username: user.username };
+  // include is_admin flag in session for authorization checks
+  req.session.user = { id: user.id, username: user.username, is_admin: user.is_admin ? 1 : 0 };
     res.redirect('/');
   } catch (err) {
     console.error('Login error', err);

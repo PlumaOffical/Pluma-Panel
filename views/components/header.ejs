@@ -1,14 +1,88 @@
 <% if (user) { %>
-<nav class="bg-white shadow">
-  <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="text-xl font-bold">Pluma Panel</a>
-    <nav>
-        <span class="mr-4">Hello, <strong><%= user.username %></strong></span>
-        <form action="/auth/logout" method="post" class="inline">
-          <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded">Logout</button>
-        </form>
+<header class="bg-white shadow">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold flex items-center gap-1">
+      Pluma Panel
+    </a>
+    <nav class="flex items-center gap-3">
+      <span class="mr-4 flex items-center gap-1">
+        <span class="material-icons text-primary-500 text-base">person</span>
+        Hello, <strong><%= user.username %></strong>
+      </span>
+      <form action="/auth/logout" method="post" class="inline">
+        <button type="submit" class="flex items-center gap-1 px-3 py-1 bg-red-500 text-white rounded">
+          <span class="material-icons text-sm">logout</span>
+          Logout
+        </button>
+      </form>
     </nav>
   </div>
-</nav>
+
+  <div class="max-w-7xl mx-auto px-2 border-t border-gray-200 text-sm font-medium text-gray-600 py-2">
+    <% if (isAdminRoute) { %>
+    <ul class="flex gap-3">
+      <li>
+        <a href="/admin" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent border-primary-500">
+          <span class="material-icons text-primary-500 text-md">dashboard</span>
+          Admin
+        </a>
+      </li>
+      <li>
+        <a href="/admin/users" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">groups</span>
+          Users
+        </a>
+      </li>
+      <li>
+        <a href="/admin/plans" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">sell</span>
+          Plans
+        </a>
+      </li>
+      <li>
+        <a href="/admin/billing" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">credit_card</span>
+          Billing
+        </a>
+      </li>
+      <li>
+        <a href="/admin/pterodactyl" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">extension</span>
+          Pterodactyl
+        </a>
+      </li>
+      <li>
+        <a href="/admin/settings" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">settings</span>
+          Settings
+        </a>
+      </li>
+    </ul>
+    <% } %>
+
+    <% if (!isAdminRoute) { %>
+    <ul class="flex gap-3">
+      <li>
+        <a href="/" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent border-primary-500">
+          <span class="material-icons text-primary-500 text-md">dashboard</span>
+          Client Area
+        </a>
+      </li>
+      <li>
+        <a href="/services" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">dns</span>
+          Services
+        </a>
+      </li>
+      <li>
+        <a href="/billing" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+          <span class="material-icons text-primary-500 text-md">credit_card</span>
+          Billing
+        </a>
+      </li>
+    </ul>
+    <% } %>
+  </div>
+</header>
 <% } else { %>
 <% } %>
