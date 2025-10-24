@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= typeof title !== 'undefined' ? title : 'Pluma Panel' %></title>
+    <link href="/css/output.css" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <%- include('./header') %>
+
+    <main class="max-w-4xl mx-auto p-6">
+      <%- body %>
+    </main>
+
+    <!-- footer (optional) -->
+    <footer class="text-center text-sm text-gray-500 mt-8">
+      &copy; <%= new Date().getFullYear() %> Pluma Panel
+    </footer>
+  </body>
+</html>

@@ -5,3 +5,4 @@ package-lock.json
 
 # SQLite database file
 /db/database.sqlite
+/db/sessions.sqlite

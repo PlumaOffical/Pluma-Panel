@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Login</title>
-    <link href="/css/output.css" rel="stylesheet" />
-  </head>
-  <body class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-    <div class="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded shadow">
-      <h2 class="text-xl font-bold mb-4">Login</h2>
-      <% if (error) { %>
-        <div class="mb-3 text-red-600"><%= error %></div>
-      <% } %>
-      <form action="/auth/login" method="post" class="space-y-4">
-        <input name="username" placeholder="Username" class="w-full p-2 border rounded" />
-        <input name="password" type="password" placeholder="Password" class="w-full p-2 border rounded" />
-        <button class="w-full py-2 bg-primary-600 text-white rounded">Login</button>
-      </form>
-      <p class="mt-3 text-sm">No account? <a href="/auth/register" class="text-primary-500">Register</a></p>
-    </div>
-  </body>
-</html>
+<% title = 'Login' %>
+
+<div class="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded shadow mx-auto">
+  <h2 class="text-xl font-bold mb-4">Login</h2>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="mb-3 text-red-600"><%= error %></div>
+  <% } %>
+  <form action="/auth/login" method="post" class="space-y-4">
+    <input name="username" placeholder="Username" class="w-full p-2 border rounded" />
+    <input name="password" type="password" placeholder="Password" class="w-full p-2 border rounded" />
+    <button class="w-full py-2 bg-primary-600 text-white rounded">Login</button>
+  </form>
+  <p class="mt-3 text-sm">No account? <a href="/auth/register" class="text-primary-500">Register</a></p>
+</div>

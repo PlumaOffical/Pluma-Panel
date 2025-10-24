@@ -1,0 +1,16 @@
+<header class="bg-white dark:bg-gray-800 shadow">
+  <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold">Pluma Panel</a>
+    <nav>
+      <% if (user) { %>
+        <span class="mr-4">Hello, <strong><%= user.username %></strong></span>
+        <form action="/auth/logout" method="post" class="inline">
+          <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded">Logout</button>
+        </form>
+      <% } else { %>
+        <a href="/auth/login" class="px-3 py-1 bg-primary-600 text-white rounded">Login</a>
+        <a href="/auth/register" class="ml-2 px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">Register</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
