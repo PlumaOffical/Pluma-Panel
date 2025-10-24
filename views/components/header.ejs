@@ -2,7 +2,7 @@
 <header class="bg-white shadow">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <a href="/" class="text-xl font-bold flex items-center gap-1">
-      Pluma Panel
+      <%= web.name %>
     </a>
     <nav class="flex items-center gap-3">
       <span class="mr-4 flex items-center gap-1">
@@ -22,7 +22,7 @@
     <% if (isAdminRoute) { %>
     <ul class="flex gap-3">
       <li>
-        <a href="/admin" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent border-primary-500">
+        <a href="/admin" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
           <span class="material-icons text-primary-500 text-md">dashboard</span>
           Admin
         </a>
@@ -40,10 +40,10 @@
         </a>
       </li>
       <li>
-        <a href="/admin/billing" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+        <button href="/admin/billing" class="flex cursor-not-allowed items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500" disabled>
           <span class="material-icons text-primary-500 text-md">credit_card</span>
           Billing
-        </a>
+        </button>
       </li>
       <li>
         <a href="/admin/pterodactyl" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
@@ -63,7 +63,7 @@
     <% if (!isAdminRoute) { %>
     <ul class="flex gap-3">
       <li>
-        <a href="/" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent border-primary-500">
+        <a href="/" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
           <span class="material-icons text-primary-500 text-md">dashboard</span>
           Client Area
         </a>
@@ -75,10 +75,10 @@
         </a>
       </li>
       <li>
-        <a href="/billing" class="flex items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500">
+        <button href="/billing" class="flex cursor-not-allowed items-center gap-1 p-2 hover:text-gray-800 border-b-2 border-transparent hover:border-primary-500" disabled>
           <span class="material-icons text-primary-500 text-md">credit_card</span>
           Billing
-        </a>
+        </button>
       </li>
     </ul>
     <% } %>

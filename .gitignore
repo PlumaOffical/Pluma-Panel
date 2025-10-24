@@ -1,8 +1,15 @@
 # Node.js dependencies
 node_modules/
 
+# Environment variables
 package-lock.json
 
 # SQLite database file
 /db/database.sqlite
 /db/sessions.sqlite
+
+# Readme files
+README.md
+
+# Config files
+/config/config.json

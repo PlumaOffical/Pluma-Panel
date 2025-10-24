@@ -1,6 +1,6 @@
-<% title = 'Admin — Users' %>
+<% title = 'Users' %>
 
-<div class="bg-white rounded shadow p-4">
+<div class="bg-white rounded-md shadow p-4">
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-xl font-bold">Users</h2>
     <a href="/admin/users/archived" class="px-3 py-1 bg-gray-200 rounded">Show Archived</a>
@@ -27,7 +27,7 @@
               <td class="px-3 py-2"><%= u.username %></td>
               <td class="px-3 py-2"><%= u.created_at ? new Date(u.created_at).toLocaleString() : '-' %></td>
               <td class="px-3 py-2"><%= u.deleted_at ? new Date(u.deleted_at).toLocaleString() : '-' %></td>
-              <td class="px-3 py-2"><%= (u.balance || 0).toFixed ? (u.balance || 0).toFixed(2) : (u.balance || 0) %></td>
+              <td id="balance-<%= u.id %>" class="px-3 py-2"><%= (u.balance || 0).toFixed ? (u.balance || 0).toFixed(2) : (u.balance || 0) %></td>
               <td class="px-3 py-2">
                 <% if (u.is_admin) { %>
                   <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">Admin</span>
@@ -36,14 +36,23 @@
                 <% } %>
               </td>
               <td class="px-3 py-2 space-x-1">
+                <!-- coin controls available for all accounts -->
+                <button data-user-id="<%= u.id %>" data-action="add" class="coin-btn px-2 py-1 bg-blue-600 text-white rounded text-sm">Add Coins</button>
+                <button data-user-id="<%= u.id %>" data-action="remove" class="coin-btn px-2 py-1 bg-indigo-600 text-white rounded text-sm">Remove Coins</button>
+
                 <% if (!u.is_admin) { %>
                   <form action="/admin/users/<%= u.id %>/make-admin" method="post" class="inline">
                     <button class="px-2 py-1 bg-green-600 text-white rounded text-sm">Make Admin</button>
                   </form>
                 <% } else { %>
-                  <form action="/admin/users/<%= u.id %>/unadmin" method="post" class="inline">
-                    <button class="px-2 py-1 bg-gray-600 text-white rounded text-sm">Unadmin</button>
-                  </form>
+                  <% if (user && user.id === u.id) { %>
+                    <!-- cannot unadmin yourself -->
+                    <button disabled class="px-2 py-1 bg-gray-300 text-gray-600 rounded text-sm" title="You cannot remove your own admin rights">Unadmin</button>
+                  <% } else { %>
+                    <form action="/admin/users/<%= u.id %>/unadmin" method="post" class="inline">
+                      <button class="px-2 py-1 bg-gray-600 text-white rounded text-sm">Unadmin</button>
+                    </form>
+                  <% } %>
                 <% } %>
 
                 <% if (!u.is_admin) { %>
@@ -81,3 +90,49 @@
     </div>
   </div>
 </div>
+<script>
+  async function adjustCoins(id, action) {
+    try {
+      const raw = prompt(action === 'add' ? 'Amount to add:' : 'Amount to remove:');
+      if (!raw) return;
+      const amount = parseFloat(raw);
+      if (isNaN(amount) || amount <= 0) return alert('Please enter a positive number');
+
+      const res = await fetch('/admin/users/' + id + '/coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, action })
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        return alert('Error: ' + txt);
+      }
+
+      const data = await res.json();
+      if (data && data.ok) {
+        const el = document.getElementById('balance-' + id);
+        if (el) {
+          // show two decimals
+          const v = (Math.round((data.newBalance || 0) * 100) / 100).toFixed(2);
+          el.textContent = v;
+        }
+      } else {
+        alert('Unexpected response');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error adjusting coins');
+    }
+  }
+  // wire up buttons that use data attributes
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.coin-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        const id = btn.dataset.userId;
+        const action = btn.dataset.action;
+        adjustCoins(id, action);
+      });
+    });
+  });
+</script>

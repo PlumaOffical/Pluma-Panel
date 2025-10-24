@@ -89,6 +89,22 @@ async function setAdminFlag(id, flag) {
   });
 }
 
+async function adjustBalance(id, delta) {
+  await ensureColumns();
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run("UPDATE users SET balance = COALESCE(balance,0) + ? WHERE id = ?", [delta, id], function (err) {
+        if (err) return reject(err);
+        db.get("SELECT balance FROM users WHERE id = ?", [id], (e, row) => {
+          if (e) return reject(e);
+          // return numeric balance or null if user not found
+          resolve(row ? (row.balance || 0) : null);
+        });
+      });
+    });
+  });
+}
+
 // archive the user into deleted_users then permanently delete from users
 async function archiveAndDeleteUser(id, deletedBy = null) {
   await ensureColumns();
@@ -147,6 +163,7 @@ module.exports = {
   getUsers,
   countUsers,
   getUserById,
+  adjustBalance,
   setAdminFlag,
   archiveAndDeleteUser,
   hardDeleteUser,

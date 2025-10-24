@@ -13,5 +13,7 @@ router.get('/archived', ensureAuth, ensureAdmin, adminCtrl.listArchived);
 router.post('/:id/make-admin', ensureAuth, ensureAdmin, adminCtrl.makeAdmin);
 router.post('/:id/unadmin', ensureAuth, ensureAdmin, adminCtrl.unadmin);
 router.post('/:id/delete', ensureAuth, ensureAdmin, adminCtrl.deleteUser);
+// Adjust coins (add / remove) via JSON POST { amount, action: 'add'|'remove' }
+router.post('/:id/coins', ensureAuth, ensureAdmin, adminCtrl.adjustCoins);
 
 module.exports = router;

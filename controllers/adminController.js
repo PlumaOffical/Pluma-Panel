@@ -30,6 +30,12 @@ exports.makeAdmin = async (req, res) => {
 exports.unadmin = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+    // prevent an admin from removing their own admin flag
+    const actorId = req.session && req.session.user ? req.session.user.id : null;
+    if (actorId && actorId === id) {
+      // don't allow self-unadmin for safety
+      return res.status(400).send('You cannot remove your own admin rights');
+    }
     await UsersAdmin.setAdminFlag(id, 0);
     res.redirect(req.get('referer') || '/admin/users');
   } catch (err) {
@@ -59,6 +65,23 @@ exports.listArchived = async (req, res) => {
   try {
     const archived = await UsersAdmin.getArchivedUsers();
     res.render('admin/archived', { archived });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+};
+
+exports.adjustCoins = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    let { amount, action } = req.body || {};
+    amount = parseFloat(amount);
+    if (isNaN(amount) || amount <= 0) return res.status(400).send('Invalid amount');
+    const delta = action === 'remove' ? -Math.abs(amount) : Math.abs(amount);
+    const newBalance = await UsersAdmin.adjustBalance(id, delta);
+    // if user not found, return 404
+    if (newBalance === null) return res.status(404).send('User not found');
+    res.json({ ok: true, newBalance });
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');

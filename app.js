@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const adminUsersRoutes = require('./routes/adminUsers');
+const adminPteroRoutes = require('./routes/adminPterodactyl');
+const adminSettingsRoutes = require('./routes/adminSettings');
 require('./db/init'); // ensures DB and table exist
 
 const app = express();
@@ -51,10 +53,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// expose web config (from config/config.json) to all views as `web`
+const fs = require('fs');
+const CONFIG_PATH = path.join(__dirname, 'config', 'config.json');
+app.use((req, res, next) => {
+  try {
+    const txt = fs.readFileSync(CONFIG_PATH, 'utf8');
+    const cfg = JSON.parse(txt);
+    res.locals.web = cfg.web || {};
+  } catch (e) {
+    res.locals.web = { name: 'Pluma Panel' };
+  }
+  next();
+});
+
 app.use('/', dashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/admin/users', adminUsersRoutes);
+app.use('/admin/pterodactyl', adminPteroRoutes);
+app.use('/admin/settings', adminSettingsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
