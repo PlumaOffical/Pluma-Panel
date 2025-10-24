@@ -1,0 +1,12 @@
+{
+  "web": {
+    "_comment": "This configs will be automaticly generated when you run Pluma Panel.",
+    "name": "Pluma",
+    "favicon": "https://example.com"
+  },
+  "pterodactyl": {
+    "_comment": "This configs will be automaticly generated when you run Pluma Panel.",
+    "url": "https://example.com",
+    "api_key": "ptla_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+}
