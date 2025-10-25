@@ -1,0 +1,45 @@
+<div class="max-w-7xl mx-auto py-6">
+  <h1 class="text-2xl font-bold mb-4">User Services (Orders)</h1>
+
+  <div class="bg-white p-4 rounded shadow">
+    <% if (orders && orders.length) { %>
+      <table class="w-full table-auto text-left border-collapse">
+        <thead>
+          <tr>
+            <th class="p-2 border">ID</th>
+            <th class="p-2 border">Username</th>
+            <th class="p-2 border">Server Name</th>
+            <th class="p-2 border">Plan</th>
+            <th class="p-2 border">Price</th>
+            <th class="p-2 border">Status</th>
+            <th class="p-2 border">Created</th>
+            <th class="p-2 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(function(o){ %>
+            <tr>
+              <td class="p-2 border"><%= o.id %></td>
+              <td class="p-2 border"><%= o.username || 'N/A' %></td>
+              <td class="p-2 border"><%= o.server_name %></td>
+              <td class="p-2 border"><%= o.plan_name || ('#' + o.plan_id) %></td>
+              <td class="p-2 border">$<%= (o.price||0).toFixed(2) %></td>
+              <td class="p-2 border"><%= o.status %></td>
+              <td class="p-2 border"><%= o.created_at %></td>
+              <td class="p-2 border">
+                <form method="post" action="/admin/services/<%= o.id %>/suspend" style="display:inline-block; margin-right:6px;">
+                  <button type="submit" class="px-2 py-1 bg-yellow-500 text-white rounded" onclick="return confirm('Suspend this service?')">Suspend</button>
+                </form>
+                <form method="post" action="/admin/services/<%= o.id %>/delete" style="display:inline-block;">
+                  <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded" onclick="return confirm('Delete this service? This will remove the order record.')">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No services/orders found.</p>
+    <% } %>
+  </div>
+</div>

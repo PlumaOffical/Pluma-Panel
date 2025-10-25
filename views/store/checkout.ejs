@@ -1,0 +1,65 @@
+<div class="max-w-3xl mx-auto py-6">
+  <h1 class="text-2xl font-bold mb-4">Checkout</h1>
+
+  <div class="bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold"><%= plan.name %></h2>
+    <p class="text-sm text-gray-600">Price: $<%= (plan.price||0).toFixed(2) %> — <%= plan.billing_cycle %></p>
+    <ul class="text-sm mt-2 mb-4">
+      <li>RAM: <%= plan.ram %> MB</li>
+      <li>Disk: <%= plan.disk %> MB</li>
+      <li>CPU: <%= plan.cpu %></li>
+    </ul>
+
+    <% if (!success) { %>
+      <form method="post" action="/store/checkout/<%= plan.id %>">
+        <label class="block mb-2">Server name</label>
+        <input name="server_name" required class="w-full p-2 border rounded mb-3" placeholder="Example: my-server" />
+        <div class="flex gap-2">
+          <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded">Confirm Order</button>
+          <a href="/store" class="px-4 py-2 border rounded">Back</a>
+        </div>
+      </form>
+    <% } else { %>
+      <% if (typeof notify !== 'undefined' && notify) { %>
+        <% if (notify.type === 'success') { %>
+          <div class="p-3 bg-green-50 border border-green-200 rounded mb-3">
+            <p class="font-semibold text-green-800"><%= notify.text %></p>
+          </div>
+        <% } else if (notify.type === 'error') { %>
+          <div class="p-3 bg-red-50 border border-red-200 rounded mb-3">
+            <p class="font-semibold text-red-800"><%= notify.text %></p>
+            <% if (notify.details) { %>
+              <pre class="mt-2 p-2 bg-white text-xs rounded border overflow-auto"><%= notify.details %></pre>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div class="p-3 bg-yellow-50 border border-yellow-200 rounded mb-3">
+            <p class="font-semibold text-yellow-800"><%= notify.text %></p>
+          </div>
+        <% } %>
+      <% } %>
+
+      <div class="p-3 bg-gray-50 border border-gray-200 rounded">
+        <p class="font-semibold">Order details</p>
+        <p>Order ID: <%= order.id %></p>
+        <p>Plan: <%= plan.name %></p>
+        <p>Server Name: <%= order.server_name %></p>
+        <p>Price: $<%= (order.price||0).toFixed(2) %></p>
+        <% if (order.ptero_server_id) { %>
+          <p class="mt-2">Provisioned server ID: <code><%= order.ptero_server_id %></code></p>
+        <% } %>
+        <% if (typeof panelUser !== 'undefined' && panelUser && panelUser.ptero_user_password) { %>
+          <div class="mt-2 p-2 bg-white border rounded text-sm">
+            <p class="font-semibold">Pterodactyl account created for you</p>
+            <p>Username: <%= panelUser.username %></p>
+            <p>Password: <code><%= panelUser.ptero_user_password %></code></p>
+            <p class="text-xs text-gray-500">Save this password now, it will not be shown again.</p>
+          </div>
+        <% } %>
+        <div class="mt-3">
+          <a href="/store" class="px-3 py-2 bg-primary-500 text-white rounded">Back to store</a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

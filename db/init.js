@@ -22,6 +22,7 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL,
+      email TEXT UNIQUE,
       is_admin INTEGER NOT NULL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );`,
@@ -45,11 +46,47 @@ db.serialize(() => {
   });
 });
 
+// ensure `email` column exists for older databases
+db.serialize(() => {
+  db.all("PRAGMA table_info(users)", (err, rows) => {
+    if (err) return console.error('Failed to read users table info for email check:', err);
+    const hasEmail = rows && rows.some(r => r.name === 'email');
+    if (!hasEmail) {
+      db.run(`ALTER TABLE users ADD COLUMN email TEXT;`, (alterErr) => {
+        if (alterErr) {
+          // ignore duplicate column race condition
+          if (!(alterErr.code === 'SQLITE_ERROR' && /duplicate column name/i.test(alterErr.message))) {
+            console.error('Failed to add email column:', alterErr);
+          }
+        } else console.log('Added email column to users table');
+      });
+    }
+  });
+});
+
+// ensure pterodactyl mapping columns exist
+db.serialize(() => {
+  db.all("PRAGMA table_info(users)", (err, rows) => {
+    if (err) return console.error('Failed to read users table info for ptero check:', err);
+    const names = (rows || []).map(r => r.name);
+    if (!names.includes('ptero_user_id')) {
+      db.run(`ALTER TABLE users ADD COLUMN ptero_user_id TEXT NULL;`, (e) => {
+        if (e && !(e.code === 'SQLITE_ERROR' && /duplicate column name/i.test(e.message))) console.error('Failed to add ptero_user_id column', e);
+      });
+    }
+    if (!names.includes('ptero_user_password')) {
+      db.run(`ALTER TABLE users ADD COLUMN ptero_user_password TEXT NULL;`, (e) => {
+        if (e && !(e.code === 'SQLITE_ERROR' && /duplicate column name/i.test(e.message))) console.error('Failed to add ptero_user_password column', e);
+      });
+    }
+  });
+});
+
 // Promise-based helpers (you can also use callbacks if you prefer)
-function createUser(username, password) {
+function createUser(username, password, email) {
   return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    db.run(sql, [username, password], function (err) {
+    const sql = 'INSERT INTO users (username, password, email) VALUES (?, ?, ?)';
+    db.run(sql, [username, password, email || null], function (err) {
       if (err) return reject(err);
       resolve(this.lastID);
     });
@@ -60,6 +97,16 @@ function findByUsername(username) {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM users WHERE username = ?';
     db.get(sql, [username], (err, row) => {
+      if (err) return reject(err);
+      resolve(row || null);
+    });
+  });
+}
+
+function findByEmail(email) {
+  return new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM users WHERE email = ?';
+    db.get(sql, [email], (err, row) => {
       if (err) return reject(err);
       resolve(row || null);
     });
@@ -86,6 +133,15 @@ function findById(id) {
   });
 }
 
+function setPteroInfo(userId, pteroId, password) {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE users SET ptero_user_id = ?, ptero_user_password = ? WHERE id = ?', [pteroId || null, password || null, userId], function (err) {
+      if (err) return reject(err);
+      resolve(this.changes);
+    });
+  });
+}
+
 function close() {
   return new Promise((resolve, reject) => {
     db.close((err) => {
@@ -99,7 +155,9 @@ module.exports = {
   db,
   createUser,
   findByUsername,
+  findByEmail,
   findById,
+  setPteroInfo,
   setAdmin,
   close,
 };

@@ -6,16 +6,24 @@ exports.showLogin = (req, res) => res.render('auth/login', { error: null });
 
 exports.register = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.render('auth/register', { error: 'Missing fields' });
+    const { username, password, email } = req.body;
+    if (!username || !password || !email) return res.render('auth/register', { error: 'Missing fields' });
+
+    // basic email validation
+    const em = String(email || '').trim().toLowerCase();
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(em)) return res.render('auth/register', { error: 'Invalid email address' });
 
     const existing = await Users.findByUsername(username);
     if (existing) return res.render('auth/register', { error: 'User already exists' });
 
+    const existingEmail = await Users.findByEmail(em);
+    if (existingEmail) return res.render('auth/register', { error: 'Email already in use' });
+
     const hash = bcrypt.hashSync(password, 10);
-  const id = await Users.createUser(username, hash);
-  // new users are not admins by default
-  req.session.user = { id, username, is_admin: 0 };
+    const id = await Users.createUser(username, hash, em);
+    // new users are not admins by default
+    req.session.user = { id, username, email: em, is_admin: 0 };
     res.redirect('/');
   } catch (err) {
     console.error('Register error', err);

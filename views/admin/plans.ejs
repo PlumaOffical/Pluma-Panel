@@ -1,0 +1,61 @@
+<div class="max-w-7xl mx-auto py-6">
+  <h1 class="text-2xl font-bold mb-4">Plans</h1>
+
+  <section class="mb-6 bg-white p-4 rounded shadow">
+    <h2 class="font-semibold mb-2">Create new plan</h2>
+    <form action="/admin/plans/create" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <input name="name" placeholder="Plan name" class="p-2 border rounded" required />
+      <input name="price" placeholder="Price (e.g. 4.99)" type="number" step="0.01" class="p-2 border rounded" required />
+      <input name="egg" placeholder="Egg (optional)" class="p-2 border rounded" />
+      <input name="nest" placeholder="Nest (optional)" class="p-2 border rounded" />
+      <input name="ram" placeholder="RAM (MB)" type="number" class="p-2 border rounded" />
+      <input name="disk" placeholder="Disk (MB)" type="number" class="p-2 border rounded" />
+      <input name="cpu" placeholder="CPU (units)" type="number" class="p-2 border rounded" />
+      <select name="billing_cycle" class="p-2 border rounded">
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+        <option value="lifetime">Lifetime</option>
+      </select>
+
+      <div class="md:col-span-2">
+        <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded">Create plan</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="bg-white p-4 rounded shadow">
+    <h2 class="font-semibold mb-2">Existing plans</h2>
+    <% if (plans && plans.length) { %>
+      <table class="w-full table-auto text-left border-collapse">
+        <thead>
+          <tr>
+            <th class="p-2 border">ID</th>
+            <th class="p-2 border">Name</th>
+            <th class="p-2 border">Resources</th>
+            <th class="p-2 border">Billing</th>
+            <th class="p-2 border">Price</th>
+            <th class="p-2 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% plans.forEach(function(plan){ %>
+            <tr>
+              <td class="p-2 border"><%= plan.id %></td>
+              <td class="p-2 border"><%= plan.name %></td>
+              <td class="p-2 border">RAM: <%= plan.ram %> MB<br/>Disk: <%= plan.disk %> MB<br/>CPU: <%= plan.cpu %></td>
+              <td class="p-2 border"><%= plan.billing_cycle %></td>
+              <td class="p-2 border">$<%= (plan.price||0).toFixed(2) %></td>
+              <td class="p-2 border">
+                <form method="post" action="/admin/plans/<%= plan.id %>/delete" onsubmit="return confirm('Delete plan <%= plan.name %>?');">
+                  <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No plans yet.</p>
+    <% } %>
+  </section>
+</div>
