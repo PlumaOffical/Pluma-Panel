@@ -1,35 +1,26 @@
 <% title = 'Admin' %>
-
-<div class="grid grid-cols-4 grid-rows-5 gap-4">
+<div class="grid grid-cols-4 gap-4 auto-rows-max">
     <% if (typeof updateAvailable !== 'undefined' && updateAvailable) { %>
     <div class="col-span-4">
         <div class="p-4 rounded bg-yellow-50 border-l-4 border-yellow-400">
             <p class="font-semibold text-yellow-800">Update Available</p>
             <p class="text-sm text-yellow-700">A newer release is available on GitHub (current: <%= currentVersion %>, latest: <%= latestRelease && (latestRelease.tag_name || latestRelease.name) ? (latestRelease.tag_name || latestRelease.name) : 'unknown' %>).</p>
             <% if (latestRelease && latestRelease.html_url) { %>
-              <p class="mt-2"><a href="<%= latestRelease.html_url %>" target="_blank" class="text-yellow-600 underline">View release on GitHub</a></p>
+            <p class="mt-2"><a href="<%= latestRelease.html_url %>" target="_blank" class="text-yellow-600 underline">View release on GitHub</a></p>
             <% } %>
         </div>
     </div>
     <% } %>
     <div class="col-span-4">
-        <div>
-            <div class="flex flex-col items-start justify-start pt-2 pl-3 h-24 shadow bg-white rounded-md">
-                <p class="text-lg text-dark font-semibold">System Information</p>
-                <p class="pt-4">You are running Pluma Panel version <span class="text-primary-600">0.1-beta</span></p>
-            </div>
+        <div class="flex flex-col items-start justify-start pt-2 pl-3 h-24 shadow bg-white rounded-md">
+            <p class="text-lg text-dark font-semibold">System Information</p>
+                <p class="pt-4">You are running Pluma Panel version <span class="text-primary-600"><%= typeof currentVersion !== 'undefined' && currentVersion ? currentVersion : '0.1-beta' %></span></p>
         </div>
     </div>
-    <div class="row-start-2">
-        <a href="https://discord.gg/V8v3vp5WDe" target="_blank" class="w-full text-white bg-yellow-600 hover:bg-yellow-700 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 block text-center">Get Help</a>
-    </div>
-    <div class="row-start-2">
-        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="w-full text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 block text-center">Documentation</a>
-    </div>
-    <div class="row-start-2">
-        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 block text-center">GitHub</a>
-    </div>
-    <div class="row-start-2">
-        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="w-full text-white bg-lime-600 hover:bg-lime-700 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 block text-center">Support the Project</a>
+    <div class="col-span-4 grid grid-cols-4 gap-4">
+        <a href="https://discord.gg/V8v3vp5WDe" target="_blank" class="text-white bg-yellow-600 hover:bg-yellow-700 font-medium rounded-lg text-sm px-5 py-2.5 block text-center">Get Help</a>
+        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm px-5 py-2.5 block text-center">Documentation</a>
+        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 block text-center">GitHub</a>
+        <a href="https://github.com/PlumaOffical/Pluma-Panel" target="_blank" class="text-white bg-lime-600 hover:bg-lime-700 font-medium rounded-lg text-sm px-5 py-2.5 block text-center">Support the Project</a>
     </div>
 </div>

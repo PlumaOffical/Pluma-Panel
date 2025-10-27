@@ -46,6 +46,7 @@ function ensureOrderColumns() {
       const adds = [];
       if (!names.includes('ptero_server_id')) adds.push("ALTER TABLE orders ADD COLUMN ptero_server_id TEXT NULL;");
       if (!names.includes('ptero_response')) adds.push("ALTER TABLE orders ADD COLUMN ptero_response TEXT NULL;");
+      if (!names.includes('expires_at')) adds.push("ALTER TABLE orders ADD COLUMN expires_at DATETIME NULL;");
   if (!names.includes('ptero_server_uuid')) adds.push("ALTER TABLE orders ADD COLUMN ptero_server_uuid TEXT NULL;");
 
       (function runNext(i) {
@@ -99,10 +100,10 @@ function deletePlan(id) {
   }));
 }
 
-function createOrder(userId, planId, serverName, price) {
+function createOrder(userId, planId, serverName, price, expiresAt = null) {
   return ensureTables().then(() => new Promise((resolve, reject) => {
-    const sql = `INSERT INTO orders (user_id, plan_id, server_name, price, status) VALUES (?, ?, ?, ?, 'pending')`;
-    db.run(sql, [userId, planId, serverName, price], function (err) {
+    const sql = `INSERT INTO orders (user_id, plan_id, server_name, price, status, expires_at) VALUES (?, ?, ?, ?, 'pending', ?)`;
+    db.run(sql, [userId, planId, serverName, price, expiresAt], function (err) {
       if (err) return reject(err);
       resolve(this.lastID);
     });

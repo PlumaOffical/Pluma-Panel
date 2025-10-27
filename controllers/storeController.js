@@ -38,8 +38,23 @@ async function postCheckout(req, res) {
       const plan = await PlansDB.getPlanById(planId);
       if (!plan) return res.status(400).send('Plan not found');
 
+      // compute expiry based on plan billing_cycle and create order
+      let expiresAt = null;
+      try {
+        const now = new Date();
+        const bc = (plan && plan.billing_cycle) ? String(plan.billing_cycle).toLowerCase() : 'monthly';
+        const exp = new Date(now.getTime());
+        if (bc.includes('year')) {
+          exp.setFullYear(exp.getFullYear() + 1);
+        } else {
+          // default to monthly
+          exp.setMonth(exp.getMonth() + 1);
+        }
+        expiresAt = exp.toISOString();
+      } catch (e) { expiresAt = null; }
+
       // create order and mark processing
-      const orderId = await PlansDB.createOrder(userId, planId, server_name, plan.price);
+      const orderId = await PlansDB.createOrder(userId, planId, server_name, plan.price, expiresAt);
       try { await PlansDB.updateOrderStatus(orderId, 'processing'); } catch (e) { console.error('Failed to set order processing status', e); }
 
       // load config
