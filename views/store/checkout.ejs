@@ -1,7 +1,9 @@
-<div class="max-w-3xl mx-auto py-6">
+<% title = 'Checkout' %>
+
+<div class="max-w-7xl mx-auto">
   <h1 class="text-2xl font-bold mb-4">Checkout</h1>
 
-  <div class="bg-white p-4 rounded shadow">
+  <div class="bg-white p-4 rounded-2xl shadow">
     <h2 class="text-lg font-semibold"><%= plan.name %></h2>
     <p class="text-sm text-gray-600">Price: $<%= (plan.price||0).toFixed(2) %> — <%= plan.billing_cycle %></p>
     <ul class="text-sm mt-2 mb-4">
@@ -13,7 +15,7 @@
     <% if (!success) { %>
       <form method="post" action="/store/checkout/<%= plan.id %>">
         <label class="block mb-2">Server name</label>
-        <input name="server_name" required class="w-full p-2 border rounded mb-3" placeholder="Example: my-server" />
+        <input name="server_name" required class="w-full p-2 border rounded mb-3" placeholder="A Example Server" />
         <div class="flex gap-2">
           <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded">Confirm Order</button>
           <a href="/store" class="px-4 py-2 border rounded">Back</a>

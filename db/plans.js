@@ -46,6 +46,7 @@ function ensureOrderColumns() {
       const adds = [];
       if (!names.includes('ptero_server_id')) adds.push("ALTER TABLE orders ADD COLUMN ptero_server_id TEXT NULL;");
       if (!names.includes('ptero_response')) adds.push("ALTER TABLE orders ADD COLUMN ptero_response TEXT NULL;");
+  if (!names.includes('ptero_server_uuid')) adds.push("ALTER TABLE orders ADD COLUMN ptero_server_uuid TEXT NULL;");
 
       (function runNext(i) {
         if (i >= adds.length) return resolve();
@@ -161,7 +162,18 @@ function markOrderProvisionResult(orderId, serverId, responseObj, status) {
   return ensureTables().then(() => ensureOrderColumns()).then(() => new Promise((resolve, reject) => {
     try {
       const respText = responseObj ? JSON.stringify(responseObj) : null;
-      db.run('UPDATE orders SET ptero_server_id = ?, ptero_response = ?, status = ? WHERE id = ?', [serverId || null, respText, status || 'pending', orderId], function (err) {
+      // try to extract server UUID/identifier from common response shapes
+      let serverUuid = null;
+      try {
+        const parsed = typeof responseObj === 'string' ? JSON.parse(responseObj) : responseObj || {};
+        const data = parsed && parsed.data ? parsed.data : parsed;
+        const attrs = data && data.attributes ? data.attributes : data;
+        serverUuid = (attrs && (attrs.identifier || attrs.uuid || attrs.id)) || (data && data.identifier) || null;
+      } catch (e) {
+        serverUuid = null;
+      }
+
+      db.run('UPDATE orders SET ptero_server_id = ?, ptero_server_uuid = ?, ptero_response = ?, status = ? WHERE id = ?', [serverId || null, serverUuid || null, respText, status || 'pending', orderId], function (err) {
         if (err) return reject(err);
         resolve(this.changes);
       });

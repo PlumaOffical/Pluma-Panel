@@ -1,0 +1,31 @@
+<% title = 'Profile' %>
+
+<div class="max-w-7xl mx-auto">
+	<h1 class="text-2xl font-bold mb-6">Profile</h1>
+	<% if (notify) { %>
+		<div class="mb-4 p-3 rounded-2xl <%= notify.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>"><%= notify.text %></div>
+	<% } %>
+	<div class="bg-white p-6 rounded-2xl shadow">
+		<h2 class="font-semibold mb-2">Change Username</h2>
+		<form method="post" action="/profile/username">
+			<label class="block text-sm mb-1">Username</label>
+			<input name="username" value="<%= user && user.username ? user.username : '' %>" class="w-full p-2 border rounded mb-3" />
+			<button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded">Save Username</button>
+		</form>
+	</div>
+	<div class="bg-white p-6 rounded-2xl shadow mt-6">
+		<h2 class="font-semibold mb-2">Change Password</h2>
+		<form method="post" action="/profile/password">
+			<label class="block text-sm mb-1">Current Password</label>
+			<input name="current_password" type="password" class="w-full p-2 border rounded mb-3" />
+
+			<label class="block text-sm mb-1">New Password</label>
+			<input name="new_password" type="password" class="w-full p-2 border rounded mb-3" />
+
+			<label class="block text-sm mb-1">Confirm New Password</label>
+			<input name="confirm_password" type="password" class="w-full p-2 border rounded mb-3" />
+
+			<button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded">Change Password</button>
+		</form>
+	</div>
+</div>

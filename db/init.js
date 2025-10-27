@@ -142,6 +142,24 @@ function setPteroInfo(userId, pteroId, password) {
   });
 }
 
+function updateUsername(userId, newUsername) {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE users SET username = ? WHERE id = ?', [newUsername, userId], function (err) {
+      if (err) return reject(err);
+      resolve(this.changes);
+    });
+  });
+}
+
+function updatePassword(userId, newPassword) {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE users SET password = ? WHERE id = ?', [newPassword, userId], function (err) {
+      if (err) return reject(err);
+      resolve(this.changes);
+    });
+  });
+}
+
 function close() {
   return new Promise((resolve, reject) => {
     db.close((err) => {
@@ -159,5 +177,7 @@ module.exports = {
   findById,
   setPteroInfo,
   setAdmin,
+  updateUsername,
+  updatePassword,
   close,
 };

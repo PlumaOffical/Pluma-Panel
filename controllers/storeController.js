@@ -178,8 +178,9 @@ async function postCheckout(req, res) {
           }
         } catch (e) { console.error('Failed to fetch egg details', e); }
 
-        // pick allocation
+        // pick allocation — gather node allocation stats and find a free allocation
         let allocationId = null;
+        const nodeStatuses = [];
         try {
           const nodesUrl = new URL('/api/application/nodes', base);
           const nodesResp = await doRequest(nodesUrl, { method: 'GET', headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' } });
@@ -187,30 +188,74 @@ async function postCheckout(req, res) {
           const nodeList = (pn && pn.data) || [];
           for (const n of nodeList) {
             const nid = (n && n.attributes && n.attributes.id) || n.id || null;
+            const nName = (n && n.attributes && (n.attributes.name || n.attributes.fqdn)) || n.name || (`node-${nid}`);
             if (!nid) continue;
             try {
               const allocUrl = new URL(`/api/application/nodes/${nid}/allocations`, base);
               const allocResp = await doRequest(allocUrl, { method: 'GET', headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' } });
               const pa = JSON.parse(allocResp.body || '{}');
               const allocList = (pa && pa.data) || [];
+              let freeCount = 0;
               for (const a of allocList) {
                 const aa = a.attributes || a;
-                if (aa && ((aa.assigned === false) || aa.server === null || aa['assigned'] === 0)) {
-                  allocationId = aa.id || a.id || (aa.ip + ':' + aa.port);
-                  break;
+                const isFree = aa && ((aa.assigned === false) || aa.server === null || aa['assigned'] === 0);
+                if (isFree) {
+                  freeCount += 1;
+                  if (!allocationId) {
+                    allocationId = aa.id || a.id || (aa.ip + ':' + aa.port);
+                  }
                 }
               }
-              if (allocationId) break;
-            } catch (e) { /* continue */ }
+
+              // Attempt to compute RAM usage on this node by listing servers on the node
+              let nodeTotalRam = null;
+              let nodeUsedRam = 0;
+              try {
+                nodeTotalRam = (n && n.attributes && (n.attributes.memory || n.attributes.memory_total || n.attributes.total_memory)) || null;
+                // fetch servers on node to sum allocated RAM
+                const srvUrl = new URL(`/api/application/nodes/${nid}/servers`, base);
+                const srvResp = await doRequest(srvUrl, { method: 'GET', headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' } });
+                const sv = JSON.parse(srvResp.body || '{}');
+                const svList = (sv && sv.data) || [];
+                for (const s of svList) {
+                  const sat = s.attributes || s;
+                  const lim = (sat && sat.limits && sat.limits.memory) || (sat && sat.attributes && sat.attributes.limits && sat.attributes.limits.memory) || (sat && sat.limits) || null;
+                  const mem = Number(lim || 0);
+                  if (!isNaN(mem)) nodeUsedRam += mem;
+                }
+              } catch (e) {
+                // if we can't compute used RAM, leave nodeUsedRam as 0 and nodeTotalRam possibly null
+                nodeUsedRam = nodeUsedRam || 0;
+              }
+
+              // decide if node has enough RAM for this plan
+              const planRam = Number(plan && plan.ram) || 0;
+              const availableRam = (nodeTotalRam !== null && !isNaN(Number(nodeTotalRam))) ? (Number(nodeTotalRam) - nodeUsedRam) : null;
+              const ramOk = (availableRam === null) ? true : (availableRam >= planRam);
+
+              nodeStatuses.push({ id: nid, name: nName, free: freeCount, total: allocList.length, ram_total: nodeTotalRam, ram_used: nodeUsedRam, ram_available: availableRam, ram_ok: ramOk });
+
+              // choose allocation only if there is a free allocation AND RAM is sufficient (if known)
+              if (allocationId && ramOk) break; // prefer first available allocation on a node with enough RAM
+              // if allocationId found but this node lacks RAM, skip it and continue searching
+              if (allocationId && !ramOk) allocationId = null;
+            } catch (e) { console.error('Failed to fetch allocations for node', nid, e); nodeStatuses.push({ id: nid, name: nName, free: 0, total: 0, ram_ok: false }); }
           }
         } catch (e) { console.error('Failed to fetch allocations', e); }
 
-        // if no allocation available, mark error and return
+        // if no allocation available across all nodes, mark error and return with friendly message showing node statuses
         if (!allocationId) {
-          const noAllocMsg = { error: 'No allocation available on any node' };
+          const totalFree = nodeStatuses.reduce((s, x) => s + (x.free || 0), 0);
+          const noAllocMsg = { error: 'No allocation available on any node', nodes: nodeStatuses };
           try { await PlansDB.markOrderProvisionResult(orderId, null, noAllocMsg, 'error'); } catch (e) { console.error('Failed to mark no-allocation error', e); }
           const finalOrderNA = await PlansDB.getOrderById(orderId);
           panelUserAfter = await Users.findById(userId);
+          if (totalFree === 0) {
+            const details = nodeStatuses.map(n => `${n.name || n.id}: ${n.free || 0}/${n.total || 0} free`).join('; ');
+            const notifyNA = { type: 'error', text: 'All nodes are full. Unable to provision at this time.', details };
+            return res.render('store/checkout', { plan, success: true, order: finalOrderNA, notify: notifyNA, panelUser: panelUserAfter });
+          }
+          // otherwise something odd happened (we couldn't select allocation although some free slots exist)
           const notifyNA = { type: 'error', text: 'No allocation available to provision the server. Contact admin.', details: JSON.stringify(noAllocMsg) };
           return res.render('store/checkout', { plan, success: true, order: finalOrderNA, notify: notifyNA, panelUser: panelUserAfter });
         }

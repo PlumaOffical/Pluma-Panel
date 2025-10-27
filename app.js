@@ -14,6 +14,7 @@ const adminPlansRoutes = require('./routes/adminPlans');
 const storeRoutes = require('./routes/store');
 const servicesRoutes = require('./routes/services');
 const adminServicesRoutes = require('./routes/adminServices');
+const profileRoutes = require('./routes/profile');
 require('./db/init'); // ensures DB and table exist
 
 const app = express();
@@ -81,6 +82,7 @@ app.use('/admin/plans', adminPlansRoutes);
 app.use('/admin/services', adminServicesRoutes);
 app.use('/store', storeRoutes);
 app.use('/services', servicesRoutes);
+app.use('/profile', profileRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
