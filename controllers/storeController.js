@@ -39,17 +39,14 @@ async function postCheckout(req, res) {
       if (!plan) return res.status(400).send('Plan not found');
 
       // compute expiry based on plan billing_cycle and create order
+      // use fixed-day arithmetic: 30 days for monthly, 365 days for yearly
       let expiresAt = null;
       try {
         const now = new Date();
         const bc = (plan && plan.billing_cycle) ? String(plan.billing_cycle).toLowerCase() : 'monthly';
-        const exp = new Date(now.getTime());
-        if (bc.includes('year')) {
-          exp.setFullYear(exp.getFullYear() + 1);
-        } else {
-          // default to monthly
-          exp.setMonth(exp.getMonth() + 1);
-        }
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const days = bc.includes('year') ? 365 : 30;
+        const exp = new Date(now.getTime() + (days * msPerDay));
         expiresAt = exp.toISOString();
       } catch (e) { expiresAt = null; }
 

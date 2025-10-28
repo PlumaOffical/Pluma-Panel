@@ -150,6 +150,15 @@ function updateOrderStatus(id, status) {
   }));
 }
 
+function updateOrderExpires(id, expiresAt) {
+  return ensureTables().then(() => ensureOrderColumns()).then(() => new Promise((resolve, reject) => {
+    db.run('UPDATE orders SET expires_at = ? WHERE id = ?', [expiresAt, id], function (err) {
+      if (err) return reject(err);
+      resolve(this.changes);
+    });
+  }));
+}
+
 function deleteOrder(id) {
   return ensureTables().then(() => ensureOrderColumns()).then(() => new Promise((resolve, reject) => {
     db.run('DELETE FROM orders WHERE id = ?', [id], function (err) {
